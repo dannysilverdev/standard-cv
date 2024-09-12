@@ -101,16 +101,10 @@
                 }
               }
             },
-            "CreateItemLogGroup": {
+            "AppLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
-                "LogGroupName": "/aws/lambda/hello-service-dev-createItem"
-              }
-            },
-            "GetItemLogGroup": {
-              "Type": "AWS::Logs::LogGroup",
-              "Properties": {
-                "LogGroupName": "/aws/lambda/hello-service-dev-getItem"
+                "LogGroupName": "/aws/lambda/hello-service-dev-app"
               }
             },
             "IamRoleLambdaExecution": {
@@ -198,18 +192,18 @@
                 }
               }
             },
-            "CreateItemLambdaFunction": {
+            "AppLambdaFunction": {
               "Type": "AWS::Lambda::Function",
               "Properties": {
                 "Code": {
                   "S3Bucket": {
                     "Ref": "ServerlessDeploymentBucket"
                   },
-                  "S3Key": "serverless/hello-service/dev/1726031709556-2024-09-11T05:15:09.556Z/hello-service.zip"
+                  "S3Key": "serverless/hello-service/dev/1726113829563-2024-09-12T04:03:49.563Z/hello-service.zip"
                 },
-                "Handler": "handler.createItem",
+                "Handler": "handler.handler",
                 "Runtime": "nodejs18.x",
-                "FunctionName": "hello-service-dev-createItem",
+                "FunctionName": "hello-service-dev-app",
                 "MemorySize": 1024,
                 "Timeout": 6,
                 "Role": {
@@ -220,52 +214,17 @@
                 }
               },
               "DependsOn": [
-                "CreateItemLogGroup"
+                "AppLogGroup"
               ]
             },
-            "GetItemLambdaFunction": {
-              "Type": "AWS::Lambda::Function",
-              "Properties": {
-                "Code": {
-                  "S3Bucket": {
-                    "Ref": "ServerlessDeploymentBucket"
-                  },
-                  "S3Key": "serverless/hello-service/dev/1726031709556-2024-09-11T05:15:09.556Z/hello-service.zip"
-                },
-                "Handler": "handler.getItem",
-                "Runtime": "nodejs18.x",
-                "FunctionName": "hello-service-dev-getItem",
-                "MemorySize": 1024,
-                "Timeout": 6,
-                "Role": {
-                  "Fn::GetAtt": [
-                    "IamRoleLambdaExecution",
-                    "Arn"
-                  ]
-                }
-              },
-              "DependsOn": [
-                "GetItemLogGroup"
-              ]
-            },
-            "CreateItemLambdaVersionPpYMu70s9NqKETSwTJUi15ov0ar9GxQnOlBtIYcAMXY": {
+            "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
-                  "Ref": "CreateItemLambdaFunction"
+                  "Ref": "AppLambdaFunction"
                 },
-                "CodeSha256": "MlgjN5ADB85gfhABspLSE/OhUsnc+UAG9c/ZRINyHfo="
-              }
-            },
-            "GetItemLambdaVersionOztFscE3EJH552oVJKpcnPVRqr7VMDwZzQd1taRg": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
-              "Properties": {
-                "FunctionName": {
-                  "Ref": "GetItemLambdaFunction"
-                },
-                "CodeSha256": "MlgjN5ADB85gfhABspLSE/OhUsnc+UAG9c/ZRINyHfo="
+                "CodeSha256": "5qQVGJPpitIe5eeP4mUcnV2hFxSYvPZIAXfrnq8hoT4="
               }
             },
             "ApiGatewayRestApi": {
@@ -338,7 +297,7 @@
                         ":lambda:path/2015-03-31/functions/",
                         {
                           "Fn::GetAtt": [
-                            "CreateItemLambdaFunction",
+                            "AppLambdaFunction",
                             "Arn"
                           ]
                         },
@@ -350,7 +309,7 @@
                 "MethodResponses": []
               },
               "DependsOn": [
-                "CreateItemLambdaPermissionApiGateway"
+                "AppLambdaPermissionApiGateway"
               ]
             },
             "ApiGatewayMethodItemIdVarGet": {
@@ -384,7 +343,7 @@
                         ":lambda:path/2015-03-31/functions/",
                         {
                           "Fn::GetAtt": [
-                            "GetItemLambdaFunction",
+                            "AppLambdaFunction",
                             "Arn"
                           ]
                         },
@@ -396,10 +355,10 @@
                 "MethodResponses": []
               },
               "DependsOn": [
-                "GetItemLambdaPermissionApiGateway"
+                "AppLambdaPermissionApiGateway"
               ]
             },
-            "ApiGatewayDeployment1726031705169": {
+            "ApiGatewayDeployment1726113825063": {
               "Type": "AWS::ApiGateway::Deployment",
               "Properties": {
                 "RestApiId": {
@@ -412,49 +371,12 @@
                 "ApiGatewayMethodItemIdVarGet"
               ]
             },
-            "CreateItemLambdaPermissionApiGateway": {
+            "AppLambdaPermissionApiGateway": {
               "Type": "AWS::Lambda::Permission",
               "Properties": {
                 "FunctionName": {
                   "Fn::GetAtt": [
-                    "CreateItemLambdaFunction",
-                    "Arn"
-                  ]
-                },
-                "Action": "lambda:InvokeFunction",
-                "Principal": "apigateway.amazonaws.com",
-                "SourceArn": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":execute-api:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":",
-                      {
-                        "Ref": "AWS::AccountId"
-                      },
-                      ":",
-                      {
-                        "Ref": "ApiGatewayRestApi"
-                      },
-                      "/*/*"
-                    ]
-                  ]
-                }
-              }
-            },
-            "GetItemLambdaPermissionApiGateway": {
-              "Type": "AWS::Lambda::Permission",
-              "Properties": {
-                "FunctionName": {
-                  "Fn::GetAtt": [
-                    "GetItemLambdaFunction",
+                    "AppLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -515,22 +437,13 @@
                 "Name": "sls-hello-service-dev-ServerlessDeploymentBucketName"
               }
             },
-            "CreateItemLambdaFunctionQualifiedArn": {
+            "AppLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "CreateItemLambdaVersionPpYMu70s9NqKETSwTJUi15ov0ar9GxQnOlBtIYcAMXY"
+                "Ref": "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI"
               },
               "Export": {
-                "Name": "sls-hello-service-dev-CreateItemLambdaFunctionQualifiedArn"
-              }
-            },
-            "GetItemLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "GetItemLambdaVersionOztFscE3EJH552oVJKpcnPVRqr7VMDwZzQd1taRg"
-              },
-              "Export": {
-                "Name": "sls-hello-service-dev-GetItemLambdaFunctionQualifiedArn"
+                "Name": "sls-hello-service-dev-AppLambdaFunctionQualifiedArn"
               }
             },
             "ServiceEndpoint": {
@@ -646,8 +559,8 @@
         "vpc": {}
       },
       "functions": {
-        "createItem": {
-          "handler": "handler.createItem",
+        "app": {
+          "handler": "handler.handler",
           "events": [
             {
               "http": {
@@ -655,19 +568,7 @@
                 "method": "post",
                 "integration": "AWS_PROXY"
               }
-            }
-          ],
-          "name": "hello-service-dev-createItem",
-          "package": {},
-          "memory": 1024,
-          "timeout": 6,
-          "runtime": "nodejs18.x",
-          "vpc": {},
-          "versionLogicalId": "CreateItemLambdaVersionPpYMu70s9NqKETSwTJUi15ov0ar9GxQnOlBtIYcAMXY"
-        },
-        "getItem": {
-          "handler": "handler.getItem",
-          "events": [
+            },
             {
               "http": {
                 "path": "item/{id}",
@@ -676,13 +577,13 @@
               }
             }
           ],
-          "name": "hello-service-dev-getItem",
+          "name": "hello-service-dev-app",
           "package": {},
           "memory": 1024,
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetItemLambdaVersionOztFscE3EJH552oVJKpcnPVRqr7VMDwZzQd1taRg"
+          "versionLogicalId": "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI"
         }
       },
       "resources": {
@@ -710,7 +611,7 @@
         "Outputs": {}
       }
     },
-    "serviceRawFile": "service: hello-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: \"Allow\"\n      Action:\n        - \"dynamodb:*\"\n      Resource: \"*\"\n\nfunctions:\n  createItem:\n    handler: handler.createItem\n    events:\n      - http:\n          path: item\n          method: post\n\n  getItem:\n    handler: handler.getItem\n    events:\n      - http:\n          path: item/{id}\n          method: get\n\nresources:\n  Resources:\n    MyDynamoDBTable:\n      Type: \"AWS::DynamoDB::Table\"\n      Properties:\n        TableName: \"MyTable\"\n        AttributeDefinitions:\n          - AttributeName: \"id\"\n            AttributeType: \"S\"\n        KeySchema:\n          - AttributeName: \"id\"\n            KeyType: \"HASH\"\n        BillingMode: PAY_PER_REQUEST\n",
+    "serviceRawFile": "service: hello-service  # Mantener el nombre del servicio\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: \"Allow\"\n      Action:\n        - \"dynamodb:*\"\n      Resource: \"*\"\n\nfunctions:\n  app:  # Cambia el nombre de la función principal a \"app\" para reflejar que usamos Express\n    handler: handler.handler\n    events:\n      - http:\n          path: item\n          method: post\n      - http:\n          path: item/{id}\n          method: get\n\nresources:\n  Resources:\n    MyDynamoDBTable:\n      Type: \"AWS::DynamoDB::Table\"\n      Properties:\n        TableName: \"MyTable\"\n        AttributeDefinitions:\n          - AttributeName: \"id\"\n            AttributeType: \"S\"\n        KeySchema:\n          - AttributeName: \"id\"\n            KeyType: \"HASH\"\n        BillingMode: PAY_PER_REQUEST\n",
     "command": [
       "deploy"
     ],
@@ -746,20 +647,14 @@
     "serviceUniqueId": "arn:aws:cloudformation:us-east-1:207567761860:stack/hello-service-dev/c104d1f0-6ed6-11ef-ac0e-0affd1a5d9e9",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:207567761860:stack/hello-service-dev/c104d1f0-6ed6-11ef-ac0e-0affd1a5d9e9",
     "serviceProviderAwsCfStackCreated": "2024-09-09T18:10:11.271Z",
-    "serviceProviderAwsCfStackUpdated": "2024-09-11T05:16:26.646Z",
+    "serviceProviderAwsCfStackUpdated": "2024-09-12T04:04:33.323Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
-        "OutputKey": "CreateItemLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:hello-service-dev-createItem:2",
+        "OutputKey": "AppLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:hello-service-dev-app:1",
         "Description": "Current Lambda function version",
-        "ExportName": "sls-hello-service-dev-CreateItemLambdaFunctionQualifiedArn"
-      },
-      {
-        "OutputKey": "GetItemLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:hello-service-dev-getItem:4",
-        "Description": "Current Lambda function version",
-        "ExportName": "sls-hello-service-dev-GetItemLambdaFunctionQualifiedArn"
+        "ExportName": "sls-hello-service-dev-AppLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "ServiceEndpoint",

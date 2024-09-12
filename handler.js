@@ -1,61 +1,53 @@
 const AWS = require('aws-sdk');
+const express = require('express');
+const serverless = require('serverless-http');
+
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const app = express();
+app.use(express.json());
 
-// Función para crear un ítem
-module.exports.createItem = async (event) => {
-  try {
-    const data = JSON.parse(event.body);
-    const params = {
-      TableName: "MyTable",
-      Item: {
-        id: data.id,
-        message: data.message
-      }
-    };
+const TABLE_NAME = 'MyTable';  // Mantén el nombre de la tabla
 
-    await dynamoDb.put(params).promise();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Ítem creado exitosamente!", item: params.Item }),
-    };
-  } catch (error) {
-    console.error("Error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Error al crear el ítem", details: error.message }),
-    };
-  }
-};
-
-// Función para obtener un ítem por ID
-module.exports.getItem = async (event) => {
+// Ruta para crear un ítem (POST /item)
+app.post('/item', async (req, res) => {
+  const { id, message } = req.body;
   const params = {
-    TableName: "MyTable",
-    Key: {
-      id: event.pathParameters.id,  // Obtenemos el ID desde la URL
+    TableName: TABLE_NAME,
+    Item: {
+      id,
+      message
     }
   };
 
   try {
-    const result = await dynamoDb.get(params).promise();
+    await dynamoDb.put(params).promise();
+    res.status(200).json({ message: 'Ítem creado exitosamente!', item: params.Item });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear el ítem', details: error.message });
+  }
+});
 
+// Ruta para obtener un ítem por ID (GET /item/:id)
+app.get('/item/:id', async (req, res) => {
+  const { id } = req.params;
+  const params = {
+    TableName: TABLE_NAME,
+    Key: { id }
+  };
+
+  try {
+    const result = await dynamoDb.get(params).promise();
     if (result.Item) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify(result.Item),
-      };
+      res.status(200).json(result.Item);
     } else {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: "Ítem no encontrado" }),
-      };
+      res.status(404).json({ error: 'Ítem no encontrado' });
     }
   } catch (error) {
-    console.error("Error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Error al obtener el ítem", details: error.message }),
-    };
+    res.status(500).json({ error: 'Error al obtener el ítem', details: error.message });
   }
-};
+});
+
+// Agregar más rutas si es necesario...
+
+// Exportar la aplicación Express como una función Lambda
+module.exports.handler = serverless(app);

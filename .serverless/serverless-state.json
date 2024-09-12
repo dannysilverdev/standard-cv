@@ -92,16 +92,10 @@
               }
             }
           },
-          "CreateItemLogGroup": {
+          "AppLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/hello-service-dev-createItem"
-            }
-          },
-          "GetItemLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/hello-service-dev-getItem"
+              "LogGroupName": "/aws/lambda/hello-service-dev-app"
             }
           },
           "IamRoleLambdaExecution": {
@@ -185,18 +179,18 @@
               }
             }
           },
-          "CreateItemLambdaFunction": {
+          "AppLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/hello-service/dev/1726031709556-2024-09-11T05:15:09.556Z/hello-service.zip"
+                "S3Key": "serverless/hello-service/dev/1726113829563-2024-09-12T04:03:49.563Z/hello-service.zip"
               },
-              "Handler": "handler.createItem",
+              "Handler": "handler.handler",
               "Runtime": "nodejs18.x",
-              "FunctionName": "hello-service-dev-createItem",
+              "FunctionName": "hello-service-dev-app",
               "MemorySize": 1024,
               "Timeout": 6,
               "Role": {
@@ -207,52 +201,17 @@
               }
             },
             "DependsOn": [
-              "CreateItemLogGroup"
+              "AppLogGroup"
             ]
           },
-          "GetItemLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/hello-service/dev/1726031709556-2024-09-11T05:15:09.556Z/hello-service.zip"
-              },
-              "Handler": "handler.getItem",
-              "Runtime": "nodejs18.x",
-              "FunctionName": "hello-service-dev-getItem",
-              "MemorySize": 1024,
-              "Timeout": 6,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              }
-            },
-            "DependsOn": [
-              "GetItemLogGroup"
-            ]
-          },
-          "CreateItemLambdaVersionPpYMu70s9NqKETSwTJUi15ov0ar9GxQnOlBtIYcAMXY": {
+          "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "CreateItemLambdaFunction"
+                "Ref": "AppLambdaFunction"
               },
-              "CodeSha256": "MlgjN5ADB85gfhABspLSE/OhUsnc+UAG9c/ZRINyHfo="
-            }
-          },
-          "GetItemLambdaVersionOztFscE3EJH552oVJKpcnPVRqr7VMDwZzQd1taRg": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetItemLambdaFunction"
-              },
-              "CodeSha256": "MlgjN5ADB85gfhABspLSE/OhUsnc+UAG9c/ZRINyHfo="
+              "CodeSha256": "5qQVGJPpitIe5eeP4mUcnV2hFxSYvPZIAXfrnq8hoT4="
             }
           },
           "ApiGatewayRestApi": {
@@ -325,7 +284,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "CreateItemLambdaFunction",
+                          "AppLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -337,7 +296,7 @@
               "MethodResponses": []
             },
             "DependsOn": [
-              "CreateItemLambdaPermissionApiGateway"
+              "AppLambdaPermissionApiGateway"
             ]
           },
           "ApiGatewayMethodItemIdVarGet": {
@@ -371,7 +330,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "GetItemLambdaFunction",
+                          "AppLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -383,10 +342,10 @@
               "MethodResponses": []
             },
             "DependsOn": [
-              "GetItemLambdaPermissionApiGateway"
+              "AppLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1726031705169": {
+          "ApiGatewayDeployment1726113825063": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -399,49 +358,12 @@
               "ApiGatewayMethodItemIdVarGet"
             ]
           },
-          "CreateItemLambdaPermissionApiGateway": {
+          "AppLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "CreateItemLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": "apigateway.amazonaws.com",
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":execute-api:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":",
-                    {
-                      "Ref": "ApiGatewayRestApi"
-                    },
-                    "/*/*"
-                  ]
-                ]
-              }
-            }
-          },
-          "GetItemLambdaPermissionApiGateway": {
-            "Type": "AWS::Lambda::Permission",
-            "Properties": {
-              "FunctionName": {
-                "Fn::GetAtt": [
-                  "GetItemLambdaFunction",
+                  "AppLambdaFunction",
                   "Arn"
                 ]
               },
@@ -502,22 +424,13 @@
               "Name": "sls-hello-service-dev-ServerlessDeploymentBucketName"
             }
           },
-          "CreateItemLambdaFunctionQualifiedArn": {
+          "AppLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateItemLambdaVersionPpYMu70s9NqKETSwTJUi15ov0ar9GxQnOlBtIYcAMXY"
+              "Ref": "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI"
             },
             "Export": {
-              "Name": "sls-hello-service-dev-CreateItemLambdaFunctionQualifiedArn"
-            }
-          },
-          "GetItemLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "GetItemLambdaVersionOztFscE3EJH552oVJKpcnPVRqr7VMDwZzQd1taRg"
-            },
-            "Export": {
-              "Name": "sls-hello-service-dev-GetItemLambdaFunctionQualifiedArn"
+              "Name": "sls-hello-service-dev-AppLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -634,8 +547,8 @@
     },
     "pluginsData": {},
     "functions": {
-      "createItem": {
-        "handler": "handler.createItem",
+      "app": {
+        "handler": "handler.handler",
         "events": [
           {
             "http": {
@@ -643,19 +556,7 @@
               "method": "post",
               "integration": "AWS_PROXY"
             }
-          }
-        ],
-        "name": "hello-service-dev-createItem",
-        "package": {},
-        "memory": 1024,
-        "timeout": 6,
-        "runtime": "nodejs18.x",
-        "vpc": {},
-        "versionLogicalId": "CreateItemLambdaVersionPpYMu70s9NqKETSwTJUi15ov0ar9GxQnOlBtIYcAMXY"
-      },
-      "getItem": {
-        "handler": "handler.getItem",
-        "events": [
+          },
           {
             "http": {
               "path": "item/{id}",
@@ -664,13 +565,13 @@
             }
           }
         ],
-        "name": "hello-service-dev-getItem",
+        "name": "hello-service-dev-app",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "GetItemLambdaVersionOztFscE3EJH552oVJKpcnPVRqr7VMDwZzQd1taRg"
+        "versionLogicalId": "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI"
       }
     },
     "resources": {
@@ -717,7 +618,7 @@
     "artifact": "/home/dannysilver/nodejs-serverless-project/.serverless/hello-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/hello-service/dev/1726031709556-2024-09-11T05:15:09.556Z",
+    "artifactDirectoryName": "serverless/hello-service/dev/1726113829563-2024-09-12T04:03:49.563Z",
     "artifact": "hello-service.zip"
   }
 }
