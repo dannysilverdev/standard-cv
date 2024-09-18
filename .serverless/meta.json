@@ -1,7 +1,7 @@
 {
   "/home/dannysilver/nodejs-serverless-project": {
     "versionSfCore": null,
-    "versionFramework": "4.3.2",
+    "versionFramework": "4.3.3",
     "isWithinCompose": false,
     "isCompose": false,
     "composeOrgName": null,
@@ -26,6 +26,9 @@
             "Resource": "*"
           }
         ],
+        "apiGateway": {
+          "apiKeys": "<REDACTED>"
+        },
         "stage": "dev",
         "versionFunctions": true,
         "compiledCloudFormationTemplate": {
@@ -199,7 +202,7 @@
                   "S3Bucket": {
                     "Ref": "ServerlessDeploymentBucket"
                   },
-                  "S3Key": "serverless/hello-service/dev/1726113829563-2024-09-12T04:03:49.563Z/hello-service.zip"
+                  "S3Key": "serverless/hello-service/dev/1726634413814-2024-09-18T04:40:13.814Z/hello-service.zip"
                 },
                 "Handler": "handler.handler",
                 "Runtime": "nodejs18.x",
@@ -217,14 +220,14 @@
                 "AppLogGroup"
               ]
             },
-            "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI": {
+            "AppLambdaVersiontWihMDztrH2rN3jJzTH43QWcsUV4BUJMfSCQ1trI4": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "AppLambdaFunction"
                 },
-                "CodeSha256": "5qQVGJPpitIe5eeP4mUcnV2hFxSYvPZIAXfrnq8hoT4="
+                "CodeSha256": "tYi6mSDSYWrPuqN4Lzsrp+DSWZ3NcDVn/fictUfHDhc="
               }
             },
             "ApiGatewayRestApi": {
@@ -261,6 +264,21 @@
                   "Ref": "ApiGatewayResourceItem"
                 },
                 "PathPart": "{id}",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceItems": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "items",
                 "RestApiId": {
                   "Ref": "ApiGatewayRestApi"
                 }
@@ -358,7 +376,145 @@
                 "AppLambdaPermissionApiGateway"
               ]
             },
-            "ApiGatewayDeployment1726113825063": {
+            "ApiGatewayMethodItemIdVarPut": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "PUT",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceItemIdVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodItemIdVarDelete": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "DELETE",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceItemIdVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodItemsGet": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceItems"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayDeployment1726634408424": {
               "Type": "AWS::ApiGateway::Deployment",
               "Properties": {
                 "RestApiId": {
@@ -368,8 +524,40 @@
               },
               "DependsOn": [
                 "ApiGatewayMethodItemPost",
-                "ApiGatewayMethodItemIdVarGet"
+                "ApiGatewayMethodItemIdVarGet",
+                "ApiGatewayMethodItemIdVarPut",
+                "ApiGatewayMethodItemIdVarDelete",
+                "ApiGatewayMethodItemsGet"
               ]
+            },
+            "ApiGatewayApiKey1": "<REDACTED>",
+            "ApiGatewayUsagePlan": {
+              "Type": "AWS::ApiGateway::UsagePlan",
+              "DependsOn": "ApiGatewayDeployment1726634408424",
+              "Properties": {
+                "ApiStages": [
+                  {
+                    "ApiId": {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "Stage": "dev"
+                  }
+                ],
+                "Description": "Usage plan for hello-service dev stage",
+                "UsagePlanName": "hello-service-dev"
+              }
+            },
+            "ApiGatewayUsagePlanKey1": {
+              "Type": "AWS::ApiGateway::UsagePlanKey",
+              "Properties": {
+                "KeyId": {
+                  "Ref": "ApiGatewayApiKey1"
+                },
+                "KeyType": "API_KEY",
+                "UsagePlanId": {
+                  "Ref": "ApiGatewayUsagePlan"
+                }
+              }
             },
             "AppLambdaPermissionApiGateway": {
               "Type": "AWS::Lambda::Permission",
@@ -440,7 +628,7 @@
             "AppLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI"
+                "Ref": "AppLambdaVersiontWihMDztrH2rN3jJzTH43QWcsUV4BUJMfSCQ1trI4"
               },
               "Export": {
                 "Name": "sls-hello-service-dev-AppLambdaFunctionQualifiedArn"
@@ -575,6 +763,28 @@
                 "method": "get",
                 "integration": "AWS_PROXY"
               }
+            },
+            {
+              "http": {
+                "path": "item/{id}",
+                "method": "put",
+                "integration": "AWS_PROXY"
+              }
+            },
+            {
+              "http": {
+                "path": "item/{id}",
+                "method": "delete",
+                "private": true,
+                "integration": "AWS_PROXY"
+              }
+            },
+            {
+              "http": {
+                "path": "items",
+                "method": "get",
+                "integration": "AWS_PROXY"
+              }
             }
           ],
           "name": "hello-service-dev-app",
@@ -583,7 +793,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "AppLambdaVersionA5RzpQBn2hcMEkrFrTWXR36dCg4zIQIj5b2eRtJqI"
+          "versionLogicalId": "AppLambdaVersiontWihMDztrH2rN3jJzTH43QWcsUV4BUJMfSCQ1trI4"
         }
       },
       "resources": {
@@ -611,14 +821,14 @@
         "Outputs": {}
       }
     },
-    "serviceRawFile": "service: hello-service  # Mantener el nombre del servicio\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: \"Allow\"\n      Action:\n        - \"dynamodb:*\"\n      Resource: \"*\"\n\nfunctions:\n  app:  # Cambia el nombre de la función principal a \"app\" para reflejar que usamos Express\n    handler: handler.handler\n    events:\n      - http:\n          path: item\n          method: post\n      - http:\n          path: item/{id}\n          method: get\n\nresources:\n  Resources:\n    MyDynamoDBTable:\n      Type: \"AWS::DynamoDB::Table\"\n      Properties:\n        TableName: \"MyTable\"\n        AttributeDefinitions:\n          - AttributeName: \"id\"\n            AttributeType: \"S\"\n        KeySchema:\n          - AttributeName: \"id\"\n            KeyType: \"HASH\"\n        BillingMode: PAY_PER_REQUEST\n",
+    "serviceRawFile": "service: hello-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: \"Allow\"\n      Action:\n        - \"dynamodb:*\"\n      Resource: \"*\"\n  apiGateway:\n    apiKeys:\n      - name: myApiKey  # Nombre de la API Key\n\nfunctions:\n  app:\n    handler: handler.handler\n    events:\n      - http:\n          path: /item\n          method: post\n      - http:\n          path: /item/{id}\n          method: get\n      - http:\n          path: /item/{id}\n          method: put\n      - http:\n          path: /item/{id}\n          method: delete\n          private: true  # Marcar DELETE como privado, requiere API Key\n      - http:\n          path: /items\n          method: get\n\nresources:\n  Resources:\n    MyDynamoDBTable:\n      Type: \"AWS::DynamoDB::Table\"\n      Properties:\n        TableName: \"MyTable\"\n        AttributeDefinitions:\n          - AttributeName: \"id\"\n            AttributeType: \"S\"\n        KeySchema:\n          - AttributeName: \"id\"\n            KeyType: \"HASH\"\n        BillingMode: PAY_PER_REQUEST\n",
     "command": [
       "deploy"
     ],
     "options": {},
     "error": null,
     "params": {},
-    "machineId": "09100580eecd01f2cd621d86f2328f3f",
+    "machineId": "1f60d240f338af702e4a4645e6b1d58d",
     "stage": "dev",
     "accessKeyV2": "<REDACTED>",
     "accessKeyV1": "<REDACTED>",
@@ -641,18 +851,18 @@
     "serviceProviderAwsCredentials": "<REDACTED>",
     "serviceProviderAwsAccountId": "207567761860",
     "projectType": "traditional",
-    "versionSf": "4.3.2",
+    "versionSf": "4.3.3",
     "serviceProviderAwsCfStackName": "hello-service-dev",
     "integrations": {},
     "serviceUniqueId": "arn:aws:cloudformation:us-east-1:207567761860:stack/hello-service-dev/c104d1f0-6ed6-11ef-ac0e-0affd1a5d9e9",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:207567761860:stack/hello-service-dev/c104d1f0-6ed6-11ef-ac0e-0affd1a5d9e9",
     "serviceProviderAwsCfStackCreated": "2024-09-09T18:10:11.271Z",
-    "serviceProviderAwsCfStackUpdated": "2024-09-12T04:04:33.323Z",
+    "serviceProviderAwsCfStackUpdated": "2024-09-18T04:40:26.198Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
         "OutputKey": "AppLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:hello-service-dev-app:1",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:hello-service-dev-app:2",
         "Description": "Current Lambda function version",
         "ExportName": "sls-hello-service-dev-AppLambdaFunctionQualifiedArn"
       },

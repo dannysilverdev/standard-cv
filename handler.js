@@ -6,9 +6,9 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const app = express();
 app.use(express.json());
 
-const TABLE_NAME = 'MyTable';  // Mantén el nombre de la tabla
+const TABLE_NAME = 'MyTable';  // Mantener el nombre de la tabla
 
-// Ruta para crear un ítem (POST /item)
+// Crear un ítem (POST /item)
 app.post('/item', async (req, res) => {
   const { id, message } = req.body;
   const params = {
@@ -27,7 +27,7 @@ app.post('/item', async (req, res) => {
   }
 });
 
-// Ruta para obtener un ítem por ID (GET /item/:id)
+// Obtener un ítem por ID (GET /item/:id)
 app.get('/item/:id', async (req, res) => {
   const { id } = req.params;
   const params = {
@@ -47,7 +47,58 @@ app.get('/item/:id', async (req, res) => {
   }
 });
 
-// Agregar más rutas si es necesario...
+// Actualizar un ítem (PUT /item/:id)
+app.put('/item/:id', async (req, res) => {
+  const { id } = req.params;
+  const { message } = req.body;
 
-// Exportar la aplicación Express como una función Lambda
+  const params = {
+    TableName: TABLE_NAME,
+    Key: { id },
+    UpdateExpression: 'set message = :message',
+    ExpressionAttributeValues: {
+      ':message': message,
+    },
+    ReturnValues: 'UPDATED_NEW'
+  };
+
+  try {
+    const result = await dynamoDb.update(params).promise();
+    res.status(200).json({ message: 'Ítem actualizado!', result });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al actualizar el ítem', details: error.message });
+  }
+});
+
+// Eliminar un ítem (DELETE /item/:id)
+app.delete('/item/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const params = {
+    TableName: TABLE_NAME,
+    Key: { id }
+  };
+
+  try {
+    await dynamoDb.delete(params).promise();
+    res.status(200).json({ message: `Ítem con id ${id} eliminado!` });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el ítem', details: error.message });
+  }
+});
+
+// Obtener todos los ítems (GET /items)
+app.get('/items', async (req, res) => {
+  const params = {
+    TableName: TABLE_NAME,
+  };
+
+  try {
+    const result = await dynamoDb.scan(params).promise();
+    res.status(200).json(result.Items);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener los ítems', details: error.message });
+  }
+});
+
 module.exports.handler = serverless(app);

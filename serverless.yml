@@ -1,4 +1,4 @@
-service: hello-service  # Mantener el nombre del servicio
+service: hello-service
 
 provider:
   name: aws
@@ -9,16 +9,29 @@ provider:
       Action:
         - "dynamodb:*"
       Resource: "*"
+  apiGateway:
+    apiKeys:
+      - name: myApiKey  # Nombre de la API Key
 
 functions:
-  app:  # Cambia el nombre de la función principal a "app" para reflejar que usamos Express
+  app:
     handler: handler.handler
     events:
       - http:
-          path: item
+          path: /item
           method: post
       - http:
-          path: item/{id}
+          path: /item/{id}
+          method: get
+      - http:
+          path: /item/{id}
+          method: put
+      - http:
+          path: /item/{id}
+          method: delete
+          private: true  # Marcar DELETE como privado, requiere API Key
+      - http:
+          path: /items
           method: get
 
 resources:
