@@ -6,7 +6,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const app = express();
 app.use(express.json());
 
-const TABLE_NAME = 'MyTable';  // Mantener el nombre de la tabla
+const TABLE_NAME = 'StandardCvTable';  // Mantener el nombre de la tabla
 
 // Crear un ítem (POST /item)
 app.post('/item', async (req, res) => {

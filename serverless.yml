@@ -1,4 +1,4 @@
-service: hello-service
+service: standard-cv-service
 
 provider:
   name: aws
@@ -39,7 +39,7 @@ resources:
     MyDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
-        TableName: "MyTable"
+        TableName: "StandardCvTable"
         AttributeDefinitions:
           - AttributeName: "id"
             AttributeType: "S"
