@@ -120,3 +120,4 @@ Este proyecto está licenciado bajo la MIT License.
 7. **Licencia**: Indica la licencia del proyecto (MIT License).
 
 Si necesitas más ajustes o personalizaciones, no dudes en decírmelo.
+standard-cv
