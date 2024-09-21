@@ -7,43 +7,41 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - "dynamodb:*"
-      Resource: "*"
-  apiGateway:
-    apiKeys:
-      - name: myApiKey  # Nombre de la API Key
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:us-east-1:207567761860:table/StandardCvTableV4"
 
 functions:
-  app:
-    handler: handler.handler
+  createUser:
+    handler: handler.createUser
     events:
       - http:
-          path: /item
+          path: user
           method: post
+          cors: true
+
+  getUser:
+    handler: handler.getUser
+    events:
       - http:
-          path: /item/{id}
+          path: user/{id}
           method: get
-      - http:
-          path: /item/{id}
-          method: put
-      - http:
-          path: /item/{id}
-          method: delete
-          private: true  # Marcar DELETE como privado, requiere API Key
-      - http:
-          path: /items
-          method: get
+          cors: true
 
 resources:
   Resources:
     MyDynamoDBTable:
-      Type: "AWS::DynamoDB::Table"
+      Type: AWS::DynamoDB::Table
       Properties:
-        TableName: "StandardCvTable"
+        TableName: StandardCvTableV4
         AttributeDefinitions:
-          - AttributeName: "id"
-            AttributeType: "S"
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
         KeySchema:
-          - AttributeName: "id"
-            KeyType: "HASH"
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
