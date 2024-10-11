@@ -9,7 +9,13 @@ provider:
       Action:
         - dynamodb:PutItem
         - dynamodb:GetItem
-      Resource: "arn:aws:dynamodb:us-east-1:207567761860:table/StandardCvTableV4"
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+        - dynamodb:Query
+      Resource: 
+        - "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4"
+        - "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4/index/email-index"  # Incluir el índice
 
 functions:
   createUser:
@@ -26,6 +32,39 @@ functions:
       - http:
           path: user/{id}
           method: get
+          cors:
+            origin: '*'  # Permitir todas las solicitudes de origen
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Amz-Date
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+
+  updateUser:
+    handler: handler.updateUser
+    events:
+      - http:
+          path: user/{id}
+          method: put
+          cors: true
+
+  deleteUser:
+    handler: handler.deleteUser
+    events:
+      - http:
+          path: user/{id}
+          method: delete
+          cors: true
+
+  getAllUsers:
+    handler: handler.getAllUsers
+    events:
+      - http:
+          path: users
+          method: get
           cors: true
 
 resources:
@@ -33,15 +72,24 @@ resources:
     MyDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: StandardCvTableV4
+        TableName: StandardCvTableV4  # Asegúrate de que el nombre coincide con tu tabla
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S
           - AttributeName: SK
+            AttributeType: S
+          - AttributeName: email
             AttributeType: S
         KeySchema:
           - AttributeName: PK
             KeyType: HASH
           - AttributeName: SK
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST

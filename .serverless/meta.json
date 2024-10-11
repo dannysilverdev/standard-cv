@@ -1,7 +1,7 @@
 {
   "/home/dannysilver/standard-cv/backend": {
     "versionSfCore": null,
-    "versionFramework": "4.4.0",
+    "versionFramework": "4.4.5",
     "isWithinCompose": false,
     "isCompose": false,
     "composeOrgName": null,
@@ -22,9 +22,16 @@
             "Effect": "Allow",
             "Action": [
               "dynamodb:PutItem",
-              "dynamodb:GetItem"
+              "dynamodb:GetItem",
+              "dynamodb:UpdateItem",
+              "dynamodb:DeleteItem",
+              "dynamodb:Scan",
+              "dynamodb:Query"
             ],
-            "Resource": "arn:aws:dynamodb:us-east-1:207567761860:table/StandardCvTableV4"
+            "Resource": [
+              "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4",
+              "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4/index/email-index"
+            ]
           }
         ],
         "stage": "dev",
@@ -43,6 +50,24 @@
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
                 "LogGroupName": "/aws/lambda/standard-cv-service-dev-getUser"
+              }
+            },
+            "UpdateUserLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/standard-cv-service-dev-updateUser"
+              }
+            },
+            "DeleteUserLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/standard-cv-service-dev-deleteUser"
+              }
+            },
+            "GetAllUsersLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/standard-cv-service-dev-getAllUsers"
               }
             },
             "IamRoleLambdaExecution": {
@@ -107,9 +132,16 @@
                           "Effect": "Allow",
                           "Action": [
                             "dynamodb:PutItem",
-                            "dynamodb:GetItem"
+                            "dynamodb:GetItem",
+                            "dynamodb:UpdateItem",
+                            "dynamodb:DeleteItem",
+                            "dynamodb:Scan",
+                            "dynamodb:Query"
                           ],
-                          "Resource": "arn:aws:dynamodb:us-east-1:207567761860:table/StandardCvTableV4"
+                          "Resource": [
+                            "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4",
+                            "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4/index/email-index"
+                          ]
                         }
                       ]
                     }
@@ -136,7 +168,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-e469ae14-d620",
-                  "S3Key": "serverless/standard-cv-service/dev/1726898330461-2024-09-21T05:58:50.461Z/standard-cv-service.zip"
+                  "S3Key": "serverless/standard-cv-service/dev/1728662333314-2024-10-11T15:58:53.314Z/standard-cv-service.zip"
                 },
                 "Handler": "handler.createUser",
                 "Runtime": "nodejs18.x",
@@ -159,7 +191,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-e469ae14-d620",
-                  "S3Key": "serverless/standard-cv-service/dev/1726898330461-2024-09-21T05:58:50.461Z/standard-cv-service.zip"
+                  "S3Key": "serverless/standard-cv-service/dev/1728662333314-2024-10-11T15:58:53.314Z/standard-cv-service.zip"
                 },
                 "Handler": "handler.getUser",
                 "Runtime": "nodejs18.x",
@@ -177,24 +209,123 @@
                 "GetUserLogGroup"
               ]
             },
-            "CreateUserLambdaVersionwLGre7I0fLrE1P2kIAd8Z6vEbSJo8Zj1mKL1xT2gpA": {
+            "UpdateUserLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-e469ae14-d620",
+                  "S3Key": "serverless/standard-cv-service/dev/1728662333314-2024-10-11T15:58:53.314Z/standard-cv-service.zip"
+                },
+                "Handler": "handler.updateUser",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "standard-cv-service-dev-updateUser",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "UpdateUserLogGroup"
+              ]
+            },
+            "DeleteUserLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-e469ae14-d620",
+                  "S3Key": "serverless/standard-cv-service/dev/1728662333314-2024-10-11T15:58:53.314Z/standard-cv-service.zip"
+                },
+                "Handler": "handler.deleteUser",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "standard-cv-service-dev-deleteUser",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "DeleteUserLogGroup"
+              ]
+            },
+            "GetAllUsersLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-e469ae14-d620",
+                  "S3Key": "serverless/standard-cv-service/dev/1728662333314-2024-10-11T15:58:53.314Z/standard-cv-service.zip"
+                },
+                "Handler": "handler.getAllUsers",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "standard-cv-service-dev-getAllUsers",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "GetAllUsersLogGroup"
+              ]
+            },
+            "CreateUserLambdaVersionpM2NnSn6itDmnScItSsdjzDc0aPqF57bLZpSoct3e5E": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "CreateUserLambdaFunction"
                 },
-                "CodeSha256": "GdwAEQeQzI2EP9SKbRrt1reoGSZ+pF0qp/b+5AZ3UTs="
+                "CodeSha256": "08FLQufXsH3jv8ElqgjHg8Vroz5V6sEhb5Kr1D5WfTQ="
               }
             },
-            "GetUserLambdaVersionhjHdlgc3TwzqLiwk43pbDQDcgoqKjLmo5PasJjHo": {
+            "GetUserLambdaVersionHIxRWTZzQCl6sDpn1e8YhscBEFtUWzcbvUN8LlFsFJw": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "GetUserLambdaFunction"
                 },
-                "CodeSha256": "GdwAEQeQzI2EP9SKbRrt1reoGSZ+pF0qp/b+5AZ3UTs="
+                "CodeSha256": "08FLQufXsH3jv8ElqgjHg8Vroz5V6sEhb5Kr1D5WfTQ="
+              }
+            },
+            "UpdateUserLambdaVersionZ93qe0QeE8izOKZ3FM9Iw3GGKYDSnHh94K9bx8DE9g": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "UpdateUserLambdaFunction"
+                },
+                "CodeSha256": "08FLQufXsH3jv8ElqgjHg8Vroz5V6sEhb5Kr1D5WfTQ="
+              }
+            },
+            "DeleteUserLambdaVersionmlfRAmzFaqsVK12efloC4YHyFdIbz3Vnrp9VuYImc": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "DeleteUserLambdaFunction"
+                },
+                "CodeSha256": "08FLQufXsH3jv8ElqgjHg8Vroz5V6sEhb5Kr1D5WfTQ="
+              }
+            },
+            "GetAllUsersLambdaVersionEFqPrXKvciV0aDiR90VAHelhz0EfWZirrGDc8vv0": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "GetAllUsersLambdaFunction"
+                },
+                "CodeSha256": "08FLQufXsH3jv8ElqgjHg8Vroz5V6sEhb5Kr1D5WfTQ="
               }
             },
             "ApiGatewayRestApi": {
@@ -231,6 +362,21 @@
                   "Ref": "ApiGatewayResourceUser"
                 },
                 "PathPart": "{id}",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceUsers": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "users",
                 "RestApiId": {
                   "Ref": "ApiGatewayRestApi"
                 }
@@ -310,7 +456,7 @@
                       "ResponseParameters": {
                         "method.response.header.Access-Control-Allow-Origin": "'*'",
                         "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
-                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,DELETE,PUT,GET'"
                       },
                       "ResponseTemplates": {
                         "application/json": ""
@@ -320,6 +466,51 @@
                 },
                 "ResourceId": {
                   "Ref": "ApiGatewayResourceUserIdVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayMethodUsersOptions": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": true,
+                      "method.response.header.Access-Control-Allow-Headers": true,
+                      "method.response.header.Access-Control-Allow-Methods": true
+                    },
+                    "ResponseModels": {}
+                  }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                  "Type": "MOCK",
+                  "RequestTemplates": {
+                    "application/json": "{statusCode:200}"
+                  },
+                  "ContentHandling": "CONVERT_TO_TEXT",
+                  "IntegrationResponses": [
+                    {
+                      "StatusCode": "200",
+                      "ResponseParameters": {
+                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                      },
+                      "ResponseTemplates": {
+                        "application/json": ""
+                      }
+                    }
+                  ]
+                },
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUsers"
                 },
                 "RestApiId": {
                   "Ref": "ApiGatewayRestApi"
@@ -418,7 +609,145 @@
                 "GetUserLambdaPermissionApiGateway"
               ]
             },
-            "ApiGatewayDeployment1726898322877": {
+            "ApiGatewayMethodUserIdVarPut": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "PUT",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUserIdVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "UpdateUserLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "UpdateUserLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodUserIdVarDelete": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "DELETE",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUserIdVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "DeleteUserLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "DeleteUserLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodUsersGet": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUsers"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "GetAllUsersLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "GetAllUsersLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayDeployment1728662322143": {
               "Type": "AWS::ApiGateway::Deployment",
               "Properties": {
                 "RestApiId": {
@@ -429,8 +758,12 @@
               "DependsOn": [
                 "ApiGatewayMethodUserOptions",
                 "ApiGatewayMethodUserIdVarOptions",
+                "ApiGatewayMethodUsersOptions",
                 "ApiGatewayMethodUserPost",
-                "ApiGatewayMethodUserIdVarGet"
+                "ApiGatewayMethodUserIdVarGet",
+                "ApiGatewayMethodUserIdVarPut",
+                "ApiGatewayMethodUserIdVarDelete",
+                "ApiGatewayMethodUsersGet"
               ]
             },
             "CreateUserLambdaPermissionApiGateway": {
@@ -507,6 +840,117 @@
                 }
               }
             },
+            "UpdateUserLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "UpdateUserLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "DeleteUserLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "DeleteUserLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "GetAllUsersLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "GetAllUsersLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
             "MyDynamoDBTable": {
               "Type": "AWS::DynamoDB::Table",
               "Properties": {
@@ -519,6 +963,10 @@
                   {
                     "AttributeName": "SK",
                     "AttributeType": "S"
+                  },
+                  {
+                    "AttributeName": "email",
+                    "AttributeType": "S"
                   }
                 ],
                 "KeySchema": [
@@ -529,6 +977,20 @@
                   {
                     "AttributeName": "SK",
                     "KeyType": "RANGE"
+                  }
+                ],
+                "GlobalSecondaryIndexes": [
+                  {
+                    "IndexName": "email-index",
+                    "KeySchema": [
+                      {
+                        "AttributeName": "email",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "Projection": {
+                      "ProjectionType": "ALL"
+                    }
                   }
                 ],
                 "BillingMode": "PAY_PER_REQUEST"
@@ -545,7 +1007,7 @@
             "CreateUserLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "CreateUserLambdaVersionwLGre7I0fLrE1P2kIAd8Z6vEbSJo8Zj1mKL1xT2gpA"
+                "Ref": "CreateUserLambdaVersionpM2NnSn6itDmnScItSsdjzDc0aPqF57bLZpSoct3e5E"
               },
               "Export": {
                 "Name": "sls-standard-cv-service-dev-CreateUserLambdaFunctionQualifiedArn"
@@ -554,10 +1016,37 @@
             "GetUserLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "GetUserLambdaVersionhjHdlgc3TwzqLiwk43pbDQDcgoqKjLmo5PasJjHo"
+                "Ref": "GetUserLambdaVersionHIxRWTZzQCl6sDpn1e8YhscBEFtUWzcbvUN8LlFsFJw"
               },
               "Export": {
                 "Name": "sls-standard-cv-service-dev-GetUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "UpdateUserLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "UpdateUserLambdaVersionZ93qe0QeE8izOKZ3FM9Iw3GGKYDSnHh94K9bx8DE9g"
+              },
+              "Export": {
+                "Name": "sls-standard-cv-service-dev-UpdateUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "DeleteUserLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "DeleteUserLambdaVersionmlfRAmzFaqsVK12efloC4YHyFdIbz3Vnrp9VuYImc"
+              },
+              "Export": {
+                "Name": "sls-standard-cv-service-dev-DeleteUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "GetAllUsersLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "GetAllUsersLambdaVersionEFqPrXKvciV0aDiR90VAHelhz0EfWZirrGDc8vv0"
+              },
+              "Export": {
+                "Name": "sls-standard-cv-service-dev-GetAllUsersLambdaFunctionQualifiedArn"
               }
             },
             "ServiceEndpoint": {
@@ -625,7 +1114,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "CreateUserLambdaVersionwLGre7I0fLrE1P2kIAd8Z6vEbSJo8Zj1mKL1xT2gpA"
+          "versionLogicalId": "CreateUserLambdaVersionpM2NnSn6itDmnScItSsdjzDc0aPqF57bLZpSoct3e5E"
         },
         "getUser": {
           "handler": "handler.getUser",
@@ -633,6 +1122,113 @@
             {
               "http": {
                 "path": "user/{id}",
+                "method": "get",
+                "cors": {
+                  "origin": "*",
+                  "methods": [
+                    "OPTIONS",
+                    "GET"
+                  ],
+                  "headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Amz-Date",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent"
+                  ],
+                  "allowCredentials": "<REDACTED>"
+                },
+                "integration": "AWS_PROXY"
+              }
+            }
+          ],
+          "name": "standard-cv-service-dev-getUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "GetUserLambdaVersionHIxRWTZzQCl6sDpn1e8YhscBEFtUWzcbvUN8LlFsFJw"
+        },
+        "updateUser": {
+          "handler": "handler.updateUser",
+          "events": [
+            {
+              "http": {
+                "path": "user/{id}",
+                "method": "put",
+                "cors": {
+                  "origin": "*",
+                  "methods": [
+                    "OPTIONS",
+                    "PUT"
+                  ],
+                  "headers": [
+                    "Content-Type",
+                    "X-Amz-Date",
+                    "Authorization",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent",
+                    "X-Amzn-Trace-Id"
+                  ],
+                  "allowCredentials": "<REDACTED>"
+                },
+                "integration": "AWS_PROXY"
+              }
+            }
+          ],
+          "name": "standard-cv-service-dev-updateUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "UpdateUserLambdaVersionZ93qe0QeE8izOKZ3FM9Iw3GGKYDSnHh94K9bx8DE9g"
+        },
+        "deleteUser": {
+          "handler": "handler.deleteUser",
+          "events": [
+            {
+              "http": {
+                "path": "user/{id}",
+                "method": "delete",
+                "cors": {
+                  "origin": "*",
+                  "methods": [
+                    "OPTIONS",
+                    "DELETE"
+                  ],
+                  "headers": [
+                    "Content-Type",
+                    "X-Amz-Date",
+                    "Authorization",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent",
+                    "X-Amzn-Trace-Id"
+                  ],
+                  "allowCredentials": "<REDACTED>"
+                },
+                "integration": "AWS_PROXY"
+              }
+            }
+          ],
+          "name": "standard-cv-service-dev-deleteUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "DeleteUserLambdaVersionmlfRAmzFaqsVK12efloC4YHyFdIbz3Vnrp9VuYImc"
+        },
+        "getAllUsers": {
+          "handler": "handler.getAllUsers",
+          "events": [
+            {
+              "http": {
+                "path": "users",
                 "method": "get",
                 "cors": {
                   "origin": "*",
@@ -655,13 +1251,13 @@
               }
             }
           ],
-          "name": "standard-cv-service-dev-getUser",
+          "name": "standard-cv-service-dev-getAllUsers",
           "package": {},
           "memory": 1024,
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetUserLambdaVersionhjHdlgc3TwzqLiwk43pbDQDcgoqKjLmo5PasJjHo"
+          "versionLogicalId": "GetAllUsersLambdaVersionEFqPrXKvciV0aDiR90VAHelhz0EfWZirrGDc8vv0"
         }
       },
       "resources": {
@@ -678,6 +1274,10 @@
                 {
                   "AttributeName": "SK",
                   "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
                 }
               ],
               "KeySchema": [
@@ -690,6 +1290,20 @@
                   "KeyType": "RANGE"
                 }
               ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "email-index",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "email",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ],
               "BillingMode": "PAY_PER_REQUEST"
             }
           }
@@ -697,14 +1311,14 @@
         "Outputs": {}
       }
     },
-    "serviceRawFile": "service: standard-cv-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: \"Allow\"\n      Action:\n        - dynamodb:PutItem\n        - dynamodb:GetItem\n      Resource: \"arn:aws:dynamodb:us-east-1:207567761860:table/StandardCvTableV4\"\n\nfunctions:\n  createUser:\n    handler: handler.createUser\n    events:\n      - http:\n          path: user\n          method: post\n          cors: true\n\n  getUser:\n    handler: handler.getUser\n    events:\n      - http:\n          path: user/{id}\n          method: get\n          cors: true\n\nresources:\n  Resources:\n    MyDynamoDBTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: StandardCvTableV4\n        AttributeDefinitions:\n          - AttributeName: PK\n            AttributeType: S\n          - AttributeName: SK\n            AttributeType: S\n        KeySchema:\n          - AttributeName: PK\n            KeyType: HASH\n          - AttributeName: SK\n            KeyType: RANGE\n        BillingMode: PAY_PER_REQUEST\n",
+    "serviceRawFile": "service: standard-cv-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  iamRoleStatements:\n    - Effect: \"Allow\"\n      Action:\n        - dynamodb:PutItem\n        - dynamodb:GetItem\n        - dynamodb:UpdateItem\n        - dynamodb:DeleteItem\n        - dynamodb:Scan\n        - dynamodb:Query\n      Resource: \n        - \"arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4\"\n        - \"arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4/index/email-index\"  # Incluir el índice\n\nfunctions:\n  createUser:\n    handler: handler.createUser\n    events:\n      - http:\n          path: user\n          method: post\n          cors: true\n\n  getUser:\n    handler: handler.getUser\n    events:\n      - http:\n          path: user/{id}\n          method: get\n          cors:\n            origin: '*'  # Permitir todas las solicitudes de origen\n            headers:\n              - Content-Type\n              - Authorization\n              - X-Amz-Date\n              - X-Api-Key\n              - X-Amz-Security-Token\n              - X-Amz-User-Agent\n            allowCredentials: false\n\n  updateUser:\n    handler: handler.updateUser\n    events:\n      - http:\n          path: user/{id}\n          method: put\n          cors: true\n\n  deleteUser:\n    handler: handler.deleteUser\n    events:\n      - http:\n          path: user/{id}\n          method: delete\n          cors: true\n\n  getAllUsers:\n    handler: handler.getAllUsers\n    events:\n      - http:\n          path: users\n          method: get\n          cors: true\n\nresources:\n  Resources:\n    MyDynamoDBTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: StandardCvTableV4  # Asegúrate de que el nombre coincide con tu tabla\n        AttributeDefinitions:\n          - AttributeName: PK\n            AttributeType: S\n          - AttributeName: SK\n            AttributeType: S\n          - AttributeName: email\n            AttributeType: S\n        KeySchema:\n          - AttributeName: PK\n            KeyType: HASH\n          - AttributeName: SK\n            KeyType: RANGE\n        GlobalSecondaryIndexes:\n          - IndexName: email-index\n            KeySchema:\n              - AttributeName: email\n                KeyType: HASH\n            Projection:\n              ProjectionType: ALL\n        BillingMode: PAY_PER_REQUEST",
     "command": [
       "deploy"
     ],
     "options": {},
     "error": null,
     "params": {},
-    "machineId": "5c7da72b364f8d36e169624a142f4d67",
+    "machineId": "73e24993976b220e253e977748e8b2a3",
     "stage": "dev",
     "accessKeyV2": "<REDACTED>",
     "accessKeyV1": "<REDACTED>",
@@ -727,30 +1341,48 @@
     "serviceProviderAwsCredentials": "<REDACTED>",
     "serviceProviderAwsAccountId": "207567761860",
     "projectType": "traditional",
-    "versionSf": "4.4.0",
+    "versionSf": "4.4.5",
     "serviceProviderAwsCfStackName": "standard-cv-service-dev",
     "integrations": {},
-    "serviceUniqueId": "arn:aws:cloudformation:us-east-1:207567761860:stack/standard-cv-service-dev/d2e390a0-779b-11ef-9ad4-0affe000842b",
-    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:207567761860:stack/standard-cv-service-dev/d2e390a0-779b-11ef-9ad4-0affe000842b",
-    "serviceProviderAwsCfStackCreated": "2024-09-20T22:01:01.539Z",
-    "serviceProviderAwsCfStackUpdated": "2024-09-21T05:59:00.180Z",
+    "serviceUniqueId": "arn:aws:cloudformation:us-east-1:207567761860:stack/standard-cv-service-dev/0744d520-7e36-11ef-b379-12a9a6550e7f",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:207567761860:stack/standard-cv-service-dev/0744d520-7e36-11ef-b379-12a9a6550e7f",
+    "serviceProviderAwsCfStackCreated": "2024-09-29T07:39:58.802Z",
+    "serviceProviderAwsCfStackUpdated": "2024-10-01T04:01:04.709Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
+        "OutputKey": "DeleteUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-deleteUser:8",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-standard-cv-service-dev-DeleteUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "GetAllUsersLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-getAllUsers:17",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-standard-cv-service-dev-GetAllUsersLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "UpdateUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-updateUser:3",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-standard-cv-service-dev-UpdateUserLambdaFunctionQualifiedArn"
+      },
+      {
         "OutputKey": "CreateUserLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-createUser:5",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-createUser:20",
         "Description": "Current Lambda function version",
         "ExportName": "sls-standard-cv-service-dev-CreateUserLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "GetUserLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-getUser:5",
+        "OutputValue": "arn:aws:lambda:us-east-1:207567761860:function:standard-cv-service-dev-getUser:20",
         "Description": "Current Lambda function version",
         "ExportName": "sls-standard-cv-service-dev-GetUserLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "ServiceEndpoint",
-        "OutputValue": "https://0e0najaond.execute-api.us-east-1.amazonaws.com/dev",
+        "OutputValue": "https://y97r7zl8m2.execute-api.us-east-1.amazonaws.com/dev",
         "Description": "URL of the service endpoint",
         "ExportName": "sls-standard-cv-service-dev-ServiceEndpoint"
       },
