@@ -1,8 +1,15 @@
+// Importaciones necesarias
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const { v4: uuidv4 } = require('uuid'); // Para generar un ID único
+const bcrypt = require('bcryptjs'); // Para cifrar contraseñas
+const jwt = require('jsonwebtoken'); // Para generar tokens JWT
 
-// Crear un nuevo usuario (POST /user)
+
+/************************************************
+ *        Crear un nuevo usuario (POST /user)     *
+ ************************************************/
+// Este endpoint crea un nuevo usuario en la base de datos DynamoDB
 module.exports.createUser = async (event) => {
   try {
     const data = JSON.parse(event.body);
@@ -35,6 +42,9 @@ module.exports.createUser = async (event) => {
     // Generar un ID único para el usuario
     const userId = uuidv4();  // Genera un ID único
     
+    // Cifrar la contraseña antes de guardarla
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    
     const params = {
       TableName: "StandardCvTableV4",  // Asegúrate de que este sea el nombre de tu tabla
       Item: {
@@ -42,6 +52,7 @@ module.exports.createUser = async (event) => {
         SK: 'PERSONAL_INFO',           // Clave secundaria (SK)
         name: data.name,               // Nombre del usuario
         email: data.email,             // Email del usuario
+        password: hashedPassword,      // Contraseña cifrada del usuario
         phone: data.phone,             // Teléfono del usuario
         location: data.location,       // Ubicación del usuario
         links: {
@@ -75,8 +86,10 @@ module.exports.createUser = async (event) => {
   }
 };
 
-
-// Obtener un usuario por ID (GET /user/{id})
+/************************************************
+ *        Obtener un usuario por ID (GET /user/{id})  *
+ ************************************************/
+// Este endpoint obtiene la información de un usuario específico por su ID
 module.exports.getUser = async (event) => {
   const { id } = event.pathParameters;
 
@@ -99,7 +112,7 @@ module.exports.getUser = async (event) => {
           "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",  // Métodos permitidos
           "Access-Control-Allow-Headers": "Content-Type, Authorization"  // Encabezados permitidos
         },
-        body: JSON.stringify(result.Item)
+        body: JSON.stringify({ ...result.Item, password: undefined })
       };
     } else {
       return {
@@ -128,7 +141,8 @@ module.exports.getUser = async (event) => {
 };
 
 
-// get All
+// Obtener todos los usuarios (GET /users)
+// Este endpoint obtiene la lista de todos los usuarios de la base de datos
 module.exports.getAllUsers = async (event) => {
   const params = {
     TableName: "StandardCvTableV4",  // Reemplaza con el nombre correcto de tu tabla
@@ -141,9 +155,9 @@ module.exports.getAllUsers = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
       },
-      body: JSON.stringify(result.Items),
+      body: JSON.stringify(result.Items.map(item => ({ ...item, password: undefined }))),
     };
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
@@ -151,12 +165,16 @@ module.exports.getAllUsers = async (event) => {
       statusCode: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
       },
       body: JSON.stringify({ message: 'Error al obtener usuarios', error: error.message }),
     };
   }
 };
 
+// Eliminar un usuario (DELETE /user/{id})
+// Este endpoint elimina un usuario específico de la base de datos por su ID
 module.exports.deleteUser = async (event) => {
   const userId = event.pathParameters.id;
 
@@ -183,6 +201,8 @@ module.exports.deleteUser = async (event) => {
       statusCode: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
       },
       body: JSON.stringify({ message: 'Usuario eliminado exitosamente' }),
     };
@@ -193,8 +213,100 @@ module.exports.deleteUser = async (event) => {
       statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
       },
       body: JSON.stringify({ message: 'Error al eliminar usuario', error: error.message }),
+    };
+  }
+};
+
+// Inicio de sesión de usuario (POST /auth/login)
+// Este endpoint permite a los usuarios iniciar sesión y recibir un token JWT
+module.exports.login = async (event) => {
+  try {
+    // Validación del cuerpo de la solicitud
+    const data = JSON.parse(event.body || '{}');
+    const { email, password } = data;
+
+    if (!email || !password) {
+      return {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "https://unicv.cl",  // Permitir solo este origen
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": true
+        },
+        body: JSON.stringify({ message: "Faltan el email o la contraseña." }),
+      };
+    }
+
+    // Verificar si el usuario existe en DynamoDB
+    const params = {
+      TableName: "StandardCvTableV4",
+      IndexName: "email-index",  // Suponiendo que has creado un índice en el campo email
+      KeyConditionExpression: "email = :email",
+      ExpressionAttributeValues: {
+        ":email": email
+      }
+    };
+
+    const result = await dynamoDb.query(params).promise();
+
+    if (result.Items.length === 0) {
+      return {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "https://unicv.cl",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": true
+        },
+        body: JSON.stringify({ message: "Credenciales incorrectas." }),
+      };
+    }
+
+    const user = result.Items[0];
+
+    // Verificar la contraseña
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "https://unicv.cl",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": true
+        },
+        body: JSON.stringify({ message: "Credenciales incorrectas." }),
+      };
+    }
+
+    // Generar un token JWT
+    const token = jwt.sign({ userId: user.PK }, 'your-secret-key', { expiresIn: '1h' });
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "https://unicv.cl",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": true
+      },
+      body: JSON.stringify({ token }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "https://unicv.cl",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": true
+      },
+      body: JSON.stringify({ message: 'Error al iniciar sesión', error: error.message }),
     };
   }
 };

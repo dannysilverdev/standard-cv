@@ -15,7 +15,12 @@ provider:
         - dynamodb:Query
       Resource: 
         - "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4"
-        - "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4/index/email-index"  # Incluir el índice
+        - "arn:aws:dynamodb:us-east-1:*:table/StandardCvTableV4/index/email-index"
+    - Effect: "Allow"
+      Action:
+        - execute-api:Invoke
+      Resource: 
+        - "arn:aws:execute-api:us-east-1:*:*"
 
 functions:
   createUser:
@@ -33,7 +38,7 @@ functions:
           path: user/{id}
           method: get
           cors:
-            origin: '*'  # Permitir todas las solicitudes de origen
+            origin: '*'  
             headers:
               - Content-Type
               - Authorization
@@ -65,14 +70,55 @@ functions:
       - http:
           path: users
           method: get
-          cors: true
+          cors:
+            origin: '*'  
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Amz-Date
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
+            
+  login:
+    handler: handler.login
+    events:
+      - http:
+          path: auth/login
+          method: options
+          cors:
+            origin:
+              - 'https://unicv.cl'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Amz-Date
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true
+      - http:
+          path: auth/login
+          method: post
+          cors:
+            origin:
+              - 'https://unicv.cl'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Amz-Date
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true
 
 resources:
   Resources:
     MyDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: StandardCvTableV4  # Asegúrate de que el nombre coincide con tu tabla
+        TableName: StandardCvTableV4
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S
@@ -93,3 +139,15 @@ resources:
             Projection:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
+
+    GatewayResponse:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          "gatewayresponse.header.Access-Control-Allow-Origin": "'https://unicv.cl'"
+          "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type, Authorization'"
+          "gatewayresponse.header.Access-Control-Allow-Methods": "'GET, POST, OPTIONS'"
+          "gatewayresponse.header.Access-Control-Allow-Credentials": "'true'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
